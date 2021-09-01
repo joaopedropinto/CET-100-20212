@@ -16,8 +16,8 @@ app.get('/clientes', (req, res) => {
   res.send(['Joao', 'Alba', 'Pedro','Samuel'])
 });
 
-app.post('/', (req, res) => {
-  res.send('Hello Post!')
+app.get('/', (req, res) => {
+  res.send('Hello Home!')
 });
 
 app.listen(process.env.PORT, 8000 | "0.0.0.0", () => {
