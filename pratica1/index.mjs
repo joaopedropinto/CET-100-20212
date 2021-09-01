@@ -13,7 +13,7 @@ app.get('/hello', (req, res) => {
 });
 
 app.get('/clientes', (req, res) => {
-  res.send(['Joao', 'Alba', 'Pedro','Samuel'])
+  res.send(['Joao', 'Alba', 'Pedro','Samuel', 'tester'])
 });
 
 app.get('/', (req, res) => {
