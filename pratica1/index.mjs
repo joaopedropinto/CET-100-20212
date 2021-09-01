@@ -17,7 +17,7 @@ app.get('/clientes', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello Home!')
+  res.send('Hello Home! \n /clientes for info \n /hello to say hi')
 });
 
 app.listen(process.env.PORT, 8000 | "0.0.0.0", () => {
