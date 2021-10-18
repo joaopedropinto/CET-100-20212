@@ -1,30 +1,28 @@
 import os
 from fastapi import FastAPI, status, Response
+from pydantic.errors import NumberNotMultipleError
 from uvicorn import Config, Server
 from pydantic import BaseModel
 
 PORT = os.environ.get('PORT') or "8000"
 app = FastAPI()
 
-class Operacao(BaseModel):
-    operacao: str
-    argumetos: dict
-
-class RespostaX(BaseModel):
-    nome: str
-    url: str
-
 class Peer(BaseModel):
     id: str
     nome: str
     url: str
 
-data = list({"server_name : João Pedro de Gois Pinto",
-        "server_endpoint : https://sd-joaopedrop-20212.herokuapp.com",
-        "descricao : Projeto de SD. Os seguintes serviços estão implementados, ... etc",
-        "versao : 0.1",
-        "status : online",
-        "tipo_de_eleicao_ativa : ring"})
+        
+data = {
+    "server_name": "João Pedro de Gois Pinto",
+    "server_endpoint": "https://sd-joaopedrop-20212.herokuapp.com/",
+    "descrição": "Projeto de SD. Os seguintes serviços estão implementados... "
+    "GET/info, PUT/info/, GET/peers, POST/peers, GET/peers{id}, PUT/peers{id}, DELETE/peers{id}",
+    "versão": "0.1",
+    "status": "online",
+    "tipo_de_eleição_ativa": "ring",
+}
+
 
 @app.get('/info', status_code=200)
 def info():
@@ -32,11 +30,17 @@ def info():
    return data
 
 @app.put('/info', status_code=200)
-def info(status: str,eleicao: str):
+def info(status: str,eleicao: str, response: Response):
 
-    data[4] = "status : " + status
+    data["status"] = status
 
-    data[5] = "tipo_de_eleicao_ativa : " + eleicao
+    data["tipo_de_eleição_ativa"] = eleicao
+
+    if status is None:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+    if eleicao is None:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+
 
     return data
 
@@ -61,7 +65,7 @@ def get_peers():
 
     return peers
 
-@app.post('/peers', status_code=200)
+@app.post('/peers', status_code=400)
 def post_peers(id: str, nome: str, url: str, response: Response, peers: Peer):
 
     if id in peers:
@@ -72,22 +76,20 @@ def post_peers(id: str, nome: str, url: str, response: Response, peers: Peer):
         return peers
 
     peers[id] = {"id": id, "nome": nome, "url": url}
-
+    response.status_code = status.HTTP_200_OK
     return peers
 
 @app.get('/peers/{id}', status_code=200)
 def get_peers_id(id, response: Response):
     if id not in peers:
-        peers[id] = "Não encontrado"
         response.status_code = status.HTTP_404_NOT_FOUND
-    return peers[id]
+    return peers
 
 @app.put('/peers/{id}',status_code=200)
 def put_peers_id(id: str, url: str, response: Response):
     if id not in peers:
-        peers[id] = "Não encontrado"
         response.status_code = status.HTTP_404_NOT_FOUND
-        return peers[id]
+        return peers
 
     setattr(peers[id], "url", url)
 
@@ -96,9 +98,8 @@ def put_peers_id(id: str, url: str, response: Response):
 @app.delete('/peers/{id}', status_code=200)
 def delete_peers_id(id: str, response: Response):
     if id not in peers:
-        peers[id] = "Não encontrado"
         response.status_code = status.HTTP_404_NOT_FOUND
-        return peers[id]
+        return peers
     del peers[id]
     return peers
 
