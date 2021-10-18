@@ -15,7 +15,7 @@ class Peer(BaseModel):
         
 data = {
     "server_name": "João Pedro de Gois Pinto",
-    "server_endpoint": "https://sd-joaopedrop-20212.herokuapp.com/",
+    "server_endpoint": "https://sd-joaopedrop-20212.herokuapp.com/ ",
     "descrição": "Projeto de SD. Os seguintes serviços estão implementados... "
     "GET/info, PUT/info/, GET/peers, POST/peers, GET/peers{id}, PUT/peers{id}, DELETE/peers{id}",
     "versão": "0.1",
