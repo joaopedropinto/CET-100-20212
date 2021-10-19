@@ -3,7 +3,7 @@ from fastapi import FastAPI, status, Response
 from uvicorn import Config, Server
 from pydantic import BaseModel
 
-PORT = os.environ.get('PORT') or "8000"
+PORT = os.environ.get('PORT')
 app = FastAPI()
 
 class Peer(BaseModel):
@@ -98,6 +98,7 @@ def post_peers(peer: Peer, response: Response ):
 
     if peer.url is None:
         response.status_code = status.HTTP_400_BAD_REQUEST
+        return response
 
     peers.append(peer)
     response.status_code = status.HTTP_200_OK
@@ -134,7 +135,7 @@ def delete_peers_id(id: str, response: Response):
 
 
 def main():
-    config = Config(app=app, host='0.0.0.0', port=int(PORT), debug=True)
+    config = Config(app=app, host='0.0.0.0', port=PORT, debug=True)
     server = Server(config=config)
     server.run()
 
