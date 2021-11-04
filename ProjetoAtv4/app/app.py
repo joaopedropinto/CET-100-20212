@@ -1,7 +1,11 @@
 import os
+from types import resolve_bases
 from fastapi import FastAPI, status, Response
 from uvicorn import Config, Server
 from pydantic import BaseModel
+from time import sleep, time
+import time
+import uuid
 
 PORT = os.environ.get('PORT')
 app = FastAPI()
@@ -18,6 +22,11 @@ class Data(BaseModel):
     versao: str
     status: str
     tipo_de_eleicao_ativa: str
+
+class gera_Recurso(BaseModel):
+    codigo_acesso: str
+    valor: int
+    validade: int
         
 data = Data(
     server_name = "Joao Pedro de Gois Pinto",
@@ -27,6 +36,12 @@ data = Data(
     versao = "0.1",
     status = "online",
     tipo_de_eleicao_ativa = "ring"
+)
+
+recurso = gera_Recurso(
+    codigo_acesso = uuid.uuid4,
+    valor = 1,
+    validade = 0
 )
 
 
@@ -130,8 +145,64 @@ def delete_peers_id(id: str, response: Response):
             del peers[indice]
             response.status_code = status.HTTP_200_OK
             return response
+
     response.status_code = status.HTTP_404_NOT_FOUND
     return response
+
+
+@app.get('/recurso',status_code=200)
+def get_recurso(codigo_usuario: str, response: Response):
+    if(recurso.validade < int(time.time())):
+        recurso.validade = 0
+        response.status_code = status.HTTP_401_ACCESS_DENIED
+        return response
+
+    if (codigo_usuario == recurso.codigo_acesso):
+        return recurso.valor
+
+    response.status_code = status.HTTP_401_ACCESS_DENIED
+    return response
+
+
+@app.put('/recurso',status_code=200)
+def put_recurso(codigo_usuario: str, valor: int, response: Response):
+    if(recurso.validade < int(time.time())):
+        recurso.validade = 0
+        response.status_code = status.HTTP_401_ACCESS_DENIED
+        return response
+
+    if(codigo_usuario == recurso.codigo_acesso):
+        recurso.valor = valor
+        return response
+
+    response.status_code = status.HTTP_401_ACCESS_DENIED
+    return response
+
+
+@app.post('/recurso',status_code=200)
+def post_recurso(codigo_usuario: str, response: Response):
+    if(codigo_usuario == recurso.codigo_acesso and recurso.validade == 0):
+
+        recurso.validade = int(time.time()) + 5
+        return response
+
+    response.status_code = status.HTTP_409_CONFLICT
+    return response
+
+@app.delete('recurso',status_code=200)
+def delete_recurso(codigo_usuario: str, response: Response):
+    if(recurso.validade < int(time.time())):
+        recurso.validade = 0
+        response.status_code = status.HTTP_410_GONE
+        return response
+
+    if(codigo_usuario == recurso.codigo_acesso):    
+        recurso.validade = 0
+        return response
+
+    response.status_code = status.HTTP_410_GONE
+    return response
+
 
 
 def main():
